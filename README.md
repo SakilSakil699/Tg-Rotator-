@@ -10,7 +10,7 @@
 An automated, ultra-fast & intelligent Telegram Channel Invite Link Rotator and Post Caption Updater.  
 Designed for channel managers who need dynamic invite links, real-time caption sync, and powerful Sudo controls.
 
-[💬 Contact Developer](https://t.me/your_username) • [📌 Features](#-key-features) • [🚀 Deploy Guide](#-repository-structure)
+[💬 Contact Developer](https://t.me/YO_UR_OFFICIAL_CRUSH) • [📌 Features](#-key-features) • [🚀 Deploy Guide](#-repository-structure)
 
 </div>
 
