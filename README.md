@@ -67,3 +67,7 @@ class Config:
             "post_ids": []
         }
     }
+🚀 Installation & Deployment (Termux / Linux)
+Clone or Update Repository:
+git clone [https://github.com/SakilSakil699/Tg-Rotator.git](https://github.com/SakilSakil699/Tg-Rotator.git)
+cd Tg-Rotator
