@@ -25,53 +25,51 @@ current_invite_link = None
 
 
 async def update_channel_posts(bot: Bot, new_link: str):
-    """Channel ki Posts Text / Media Captions ko auto-edit karein"""
+    """Channel ki Posts (Caption & Text) ko edit karein"""
     if not POST_IDS:
-        logger.info("POST_IDS configured nahi hai.")
+        logger.info("Koi POST_IDS set nahi hai.")
         return
 
-    for msg_id in POST_IDS:
-        try:
-            # Step A: Pehle Media Caption Edit karne ka try karein (Files/APKs ke liye)
-            try:
-                await bot.edit_message_caption(
-                    chat_id=CHANNEL_ID,
-                    message_id=msg_id,
-                    caption=f"👉 **Join Our Channel:** {new_link}",
-                    parse_mode="Markdown"
-                )
-                logger.info(f"Post ID {msg_id} (Media Caption) update ho gaya!")
-                continue
-            except TelegramError as e:
-                # Agar Media nahi hai, toh standard message edit try karein
-                if "There is no caption in the message to edit" in str(e) or "message is not modified" in str(e):
-                    pass
-                else:
-                    logger.debug(f"Caption edit attempt info: {e}")
+    new_text = f"👉 Join Our Channel: {new_link}"
 
-            # Step B: Normal Text Message Edit karein
-            await bot.edit_message_text(
+    for msg_id in POST_IDS:
+        edited = False
+        
+        # 1. Media Caption Edit (Files/APKs ke liye)
+        try:
+            await bot.edit_message_caption(
                 chat_id=CHANNEL_ID,
                 message_id=msg_id,
-                text=f"👉 **Join Our Channel:** {new_link}",
-                parse_mode="Markdown",
-                disable_web_page_preview=True
+                caption=new_text
             )
-            logger.info(f"Post ID {msg_id} (Text Message) update ho gaya!")
-
+            logger.info(f"Post ID {msg_id} (Media Caption) update ho gaya!")
+            edited = True
         except TelegramError as e:
-            logger.warning(f"Post ID {msg_id} edit nahi ho paya: {e}")
+            logger.debug(f"Media Caption Edit Attempt for {msg_id}: {e}")
+
+        # 2. Normal Text Message Edit (Agar Media na ho)
+        if not edited:
+            try:
+                await bot.edit_message_text(
+                    chat_id=CHANNEL_ID,
+                    message_id=msg_id,
+                    text=new_text,
+                    disable_web_page_preview=True
+                )
+                logger.info(f"Post ID {msg_id} (Text Message) update ho gaya!")
+            except TelegramError as e:
+                logger.warning(f"Post ID {msg_id} edit nahi ho paya: {e}")
 
 
 async def rotate_link_loop():
     global current_invite_link
     bot = Bot(token=Config.BOT_TOKEN)
 
-    logger.info("Auto Link Rotator with Caption Support Started!")
+    logger.info("Auto Link Rotator Engine Started!")
 
     while True:
         try:
-            # 1. Purana link revoke karein
+            # Step 1: Purana link revoke karein
             if current_invite_link:
                 try:
                     await bot.revoke_chat_invite_link(
@@ -79,9 +77,9 @@ async def rotate_link_loop():
                         invite_link=current_invite_link
                     )
                 except TelegramError as e:
-                    logger.warning(f"Purana link revoke issue: {e}")
+                    logger.warning(f"Purana link revoke error: {e}")
 
-            # 2. Naya Invite Link generate karein
+            # Step 2: Naya link banayein
             new_link_obj = await bot.create_chat_invite_link(
                 chat_id=CHANNEL_ID,
                 name="Auto-Rotated Link"
@@ -89,14 +87,14 @@ async def rotate_link_loop():
             current_invite_link = new_link_obj.invite_link
             logger.info(f"Naya Link Ban Gaya: {current_invite_link}")
 
-            # 3. Channel posts & APK captions update karein
+            # Step 3: Posts & APK captions edit karein
             await update_channel_posts(bot, current_invite_link)
 
-            # 4. Admin/Logger Notification
+            # Step 4: Admin/Logger notification
             if LOG_CHAT_ID:
                 await bot.send_message(
                     chat_id=LOG_CHAT_ID,
-                    text=f"🔄 **Link Updated & Posts Edited!**\n\nNaya Link: {current_invite_link}"
+                    text=f"🔄 Link Updated & Posts Edited!\n\nNaya Link: {current_invite_link}"
                 )
 
         except Exception as e:
