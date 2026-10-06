@@ -237,13 +237,23 @@ async def channel_post_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.info(f"Nayi post auto-detect hui Channel {msg.chat_id} me | Message ID: {msg.message_id}")
 
 
-# --- COMMANDS WITH SAKIL CREDIT MENU ---
+# --- GENERAL PUBLIC COMMANDS ---
+
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    welcome_text = (
+        f"<b>🤖 Sakil's Pro Link Rotator Bot is Online!</b>\n\n"
+        f"👑 <b>Developed & Maintained by:</b> <a href='https://t.me/YO_UR_OFFICIAL_CRUSH'>Sakil</a>\n"
+        f"⚡ <b>Status:</b> Running Smoothly 24/7\n\n"
+        f"📋 Type /help to view all available admin commands."
+    )
+    await update.message.reply_text(welcome_text, parse_mode="HTML", disable_web_page_preview=True)
+
 
 @sudo_only
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = (
         f"<b>🤖 Sakil's Pro Link Rotator Control Panel</b>\n\n"
-        f"👑 <i>Created with ❤️️ by <b>Sakil</b></i>\n"
+        f"👑 <i>Created with ❤ by <b>Sakil</b></i>\n"
         f"🔗 <a href='https://t.me/YO_UR_OFFICIAL_CRUSH'><b>Support / Owner Profile</b></a>\n\n"
         f"<b>⚙️ Admin Commands List:</b>\n"
         f"• /status - Bot system health & stats\n"
@@ -264,6 +274,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(help_text, parse_mode="HTML", disable_web_page_preview=True)
 
+
+# --- SUDO PROTECTED ADMIN COMMANDS ---
 
 @sudo_only
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -421,7 +433,7 @@ async def remove_channel_command(update: Update, context: ContextTypes.DEFAULT_T
             if ch_id in DYNAMIC_POST_IDS:
                 del DYNAMIC_POST_IDS[ch_id]
             save_data()
-            await update.message.reply_text(f"🗑️ Channel <code>{ch_id}</code> removed!\n👑 <i>By Sakil</i>", parse_mode="HTML")
+            await update.message.reply_text(f"🗑️️ Channel <code>{ch_id}</code> removed!\n👑 <i>By Sakil</i>", parse_mode="HTML")
         else:
             await update.message.reply_text("⚠️ Ye Channel list me nahi mila.")
     except ValueError:
@@ -461,7 +473,7 @@ async def remove_post_command(update: Update, context: ContextTypes.DEFAULT_TYPE
             save_data()
             await update.message.reply_text(f"🗑️ Post ID `{msg_id}` removed from channel <code>{ch_id}</code>!\n👑 <i>By Sakil</i>", parse_mode="HTML")
         else:
-            await update.message.reply_text("⚠️️ Ye Post ID list me nahi mili.")
+            await update.message.reply_text("⚠️ Ye Post ID list me nahi mili.")
     except ValueError:
         await update.message.reply_text("❌ Valid numbers daalo.")
 
@@ -471,7 +483,7 @@ async def clear_cache_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     global POST_CONTENTS
     POST_CONTENTS.clear()
     save_data()
-    await update.message.reply_text("🧹 Text cache cleared!\n👑 <i>Managed by Sakil</i>")
+    await update.message.reply_text("🧹 Text cache cleared!\n👑 <i>Managed by Sakil</i>", parse_mode="HTML")
 
 
 @sudo_only
@@ -497,7 +509,6 @@ async def rotate_link_loop(app: Application):
     bot = app.bot
     logger.info("Sakil's Pro Dynamic Rotator Engine Active!")
 
-    # Startup pe Log Group ya Sudo owner ko Startup Banner bhejenge
     log_id = CURRENT_CONFIG["log_chat_id"]
     if log_id:
         try:
@@ -533,7 +544,8 @@ async def post_init(app: Application):
 def main():
     app = Application.builder().token(Config.BOT_TOKEN).post_init(post_init).build()
     
-    # Registering Commands with Sakil Credit Header
+    # Registering Handlers
+    app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("status", status_command))
     app.add_handler(CommandHandler("list", list_command))
