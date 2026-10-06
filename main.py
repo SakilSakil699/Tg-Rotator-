@@ -25,12 +25,14 @@ current_invite_link = None
 
 
 async def update_channel_posts(bot: Bot, new_link: str):
-    """Channel ki Posts (Caption & Text) ko edit karein"""
+    """Channel ki posts me HTML format se Hyperlink text update karein"""
     if not POST_IDS:
         logger.info("Koi POST_IDS set nahi hai.")
         return
 
-    new_text = f"👉 Join Our Channel: {new_link}"
+    # Hyperlink Text Format (HTML Mode)
+    # Aap 'Click Here' ki jagah 'Touch Here' ya 'Join Channel' bhi likh sakte hain
+    formatted_text = f'👉 <a href="{new_link}">Click Here To Join Channel</a>'
 
     for msg_id in POST_IDS:
         edited = False
@@ -40,9 +42,10 @@ async def update_channel_posts(bot: Bot, new_link: str):
             await bot.edit_message_caption(
                 chat_id=CHANNEL_ID,
                 message_id=msg_id,
-                caption=new_text
+                caption=formatted_text,
+                parse_mode="HTML"
             )
-            logger.info(f"Post ID {msg_id} (Media Caption) update ho gaya!")
+            logger.info(f"Post ID {msg_id} (Caption Hyperlink) update ho gaya!")
             edited = True
         except TelegramError as e:
             logger.debug(f"Media Caption Edit Attempt for {msg_id}: {e}")
@@ -53,10 +56,11 @@ async def update_channel_posts(bot: Bot, new_link: str):
                 await bot.edit_message_text(
                     chat_id=CHANNEL_ID,
                     message_id=msg_id,
-                    text=new_text,
+                    text=formatted_text,
+                    parse_mode="HTML",
                     disable_web_page_preview=True
                 )
-                logger.info(f"Post ID {msg_id} (Text Message) update ho gaya!")
+                logger.info(f"Post ID {msg_id} (Text Hyperlink) update ho gaya!")
             except TelegramError as e:
                 logger.warning(f"Post ID {msg_id} edit nahi ho paya: {e}")
 
@@ -65,7 +69,7 @@ async def rotate_link_loop():
     global current_invite_link
     bot = Bot(token=Config.BOT_TOKEN)
 
-    logger.info("Auto Link Rotator Engine Started!")
+    logger.info("Auto Link Rotator with Hyperlink Started!")
 
     while True:
         try:
@@ -87,14 +91,15 @@ async def rotate_link_loop():
             current_invite_link = new_link_obj.invite_link
             logger.info(f"Naya Link Ban Gaya: {current_invite_link}")
 
-            # Step 3: Posts & APK captions edit karein
+            # Step 3: Posts me Hyperlink update karein
             await update_channel_posts(bot, current_invite_link)
 
             # Step 4: Admin/Logger notification
             if LOG_CHAT_ID:
                 await bot.send_message(
                     chat_id=LOG_CHAT_ID,
-                    text=f"🔄 Link Updated & Posts Edited!\n\nNaya Link: {current_invite_link}"
+                    text=f'🔄 Link Updated & Posts Edited!\n\nNaya Link: <a href="{current_invite_link}">Click Here</a>',
+                    parse_mode="HTML"
                 )
 
         except Exception as e:
