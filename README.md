@@ -1,39 +1,45 @@
 <div align="center">
 
-  # ⚡ Telegram Multi-Channel Auto Link Rotator ⚡
+# ⚡ SAKIL AUTO ROTATOR PRO ⚡
 
-  <p align="center">
-    <b>A powerful, asynchronous, 24/7 automated Telegram invite link rotation engine with dynamic post discovery, watermark preservation, and multi-channel support.</b>
-  </p>
+[![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg?style=for-the-badge&logo=python)](https://www.python.org/)
+[![Telegram API](https://img.shields.io/badge/Telegram-python--telegram--bot-2CA5E0.svg?style=for-the-badge&logo=telegram)](https://python-telegram-bot.org/)
+[![Status](https://img.shields.io/badge/Bot_Status-Active_24%2F7-brightgreen.svg?style=for-the-badge)](https://t.me/YO_UR_OFFICIAL_CRUSH)
+[![Developer](https://img.shields.io/badge/Developer-Sakil-ff69b4.svg?style=for-the-badge&logo=telegram)](https://t.me/YO_UR_OFFICIAL_CRUSH)
 
-  [![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-  [![Telegram API](https://img.shields.io/badge/Telegram-Bot%20API-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://core.telegram.org/bots/api)
-  [![Process Manager](https://img.shields.io/badge/PM2-Daemon-green?style=for-the-badge&logo=pm2&logoColor=white)](https://pm2.keymetrics.io/)
-  [![Maintained By](https://img.shields.io/badge/Made%20By-Sakil-ff69b4?style=for-the-badge)](https://t.me/YO_UR_OFFICIAL_CRUSH)
-
+<p align="center">
+  <b>An automated, ultra-fast & intelligent Telegram Channel Invite Link Rotator and Post Caption Updater.</b>
   <br />
-
-  ---
-
-</div>
-
-## 📌 Features
-
-- **🔄 Multi-Channel Support:** Manage and rotate links across multiple Telegram channels simultaneously using a unified configuration.
-- **🔍 Auto-Discovery Engine:** Automatically scans and detects all existing post IDs (from ID 1 to latest) without manual entry.
-- **⚡ Real-Time New Post Listener:** Tracks and automatically registers any newly uploaded channel posts on the fly.
-- **🧼 Anti-Duplicate Clean Logic:** Smart Regex cleaning strips outdated invite links and formatting before applying fresh updates—no line duplication.
-- **🛡️ Error & Deletion Resilience:** Automatically skips deleted post IDs (`MessageNotFound`) safely without stopping the background loop.
-- **🎨 HTML Hyperlink Formatting:** Appends bold clickable join tags along with customized profile credits (`Made by Sakil`).
-- **📱 24/7 Termux & PM2 Ready:** Ultra-lightweight and optimized for non-stop background execution via PM2 process manager.
+  Designed for channel managers who need dynamic invite links, real-time caption sync, and powerful Sudo controls.
+</p>
 
 ---
 
-## 🏗️ Project Architecture
+[👑 Contact Developer](https://t.me/YO_UR_OFFICIAL_CRUSH) • [📖 Features](#-key-features) • [🚀 Deploy Guide](#-quick-deployment)
 
-```plain
-Tg-Rotator-/
-├── config.py          # Mapped Channel IDs, Token, and Rotation Settings
-├── main.py            # Core Async Bot Logic, Event Listeners, & Regex Cleaner
-├── requirements.txt    # Python Dependencies
-└── README.md          # Project Documentation
+</div>
+
+---
+
+## 🌟 Key Features
+
+* **🔄 Automated Link Rotation:** Revokes expired invite links and issues fresh ones automatically at set intervals.
+* **📝 Dynamic Caption Syncing:** Scans and updates all existing & new post captions with dynamic links in real-time.
+* **🛡️ Sudo Guard Architecture:** Advanced decorator protection to ensure only authorized admins can run control commands.
+* **🔍 Instant Auto-Discovery:** Automatically detects newly posted messages in channels without manual post ID entries.
+* **⚡ On-The-Fly Commands:** Change timing intervals, add sudos, or force-rotate directly via Telegram chat.
+* **💾 Intelligent JSON Caching:** Prevents API limit hits by caching cleaned message texts in `bot_data.json`.
+* **👑 Embedded Developer Credits:** Every bot message and rotated caption includes stylish clickable credits pointing to the creator's profile.
+
+---
+
+## 📁 Repository Structure
+
+```text
+📂 Sakil-Auto-Rotator-Pro
+ ├── 📜 main.py              # Core application logic & command handlers
+ ├── ⚙️ config.py            # Environment configurations & credentials
+ ├── 📦 requirements.txt     # Python dependency specifications
+ ├── 🚀 Procfile             # Process launcher for Render / Heroku / Koyeb
+ ├── 💾 bot_data.json        # Dynamic local cache & persistent database
+ └── 📄 README.md            # Documentation
