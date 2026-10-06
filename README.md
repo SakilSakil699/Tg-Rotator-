@@ -21,6 +21,7 @@
 
 ---
 
+<a name="-key-features"></a>
 ## 🌟 Key Features
 
 * **🔄 Automated Link Rotation:** Revokes expired invite links and issues fresh ones automatically at set intervals.
