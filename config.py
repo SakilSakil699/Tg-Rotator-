@@ -1,56 +1,31 @@
 import os
 
 class Config:
-    # ==========================================
-    # 🔑 BOT AUTH & CREDENTIALS
-    # ==========================================
-    # BotFather se mila HTTP API Token yahan daalein
+    # 1. Telegram Bot Token (@BotFather se mila hua token yahan daalein)
     BOT_TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 
-    # ==========================================
-    # 👤 DEVELOPER & BRANDING DETAILS
-    # ==========================================
-    DEVELOPER_NAME = "Sakil"
-    DEVELOPER_USERNAME = "YO_UR_OFFICIAL_CRUSH"  # Without @
-    BOT_NAME = "Sakil Auto Rotator Pro"
+    # 2. Log Channel ya Group ID (Yahan bot apna startup banner aur rotation logs bhejega, -100 se start hona chahiye)
+    LOG_CHAT_ID = os.environ.get("LOG_CHAT_ID", "-1001862025596")
 
-    # ==========================================
-    # 👑 SUDO / ADMIN USERS
-    # ==========================================
-    # Apni Telegram User ID yahan daalein (Rose bot me /id bhej kar check kar sakte hain)
-    # Multiples users ke liye comma lagayein: [123456789, 987654321]
+    # 3. Rotation Interval (Seconds me, jaise 3600 seconds = 1 ghanta)
+    ROTATE_INTERVAL = int(os.environ.get("ROTATE_INTERVAL", 3600))
+
+    # 4. Sudo Users List (Yahan apni Telegram User ID daalein taaki sirf aap commands access kar sakein)
     SUDO_USERS = [
-        int(x) for x in os.environ.get("SUDO_USERS", "123456789").split()
+        123456789,  # Apni Telegram Numeric User ID yahan replace karein
     ]
 
-    # ==========================================
-    # ⏱️ ROTATION SETTINGS
-    # ==========================================
-    # Auto Rotation interval (seconds me)
-    # 1800 = 30 min | 3600 = 1 hour | 600 = 10 min
-    ROTATE_INTERVAL = int(os.environ.get("ROTATE_INTERVAL", 1800))
-
-    # ==========================================
-    # 📊 LOG CHANNEL SETTINGS
-    # ==========================================
-    # Jahan rotation successful hone ke logs aayenge (Channel ID -100 se start hoti hai)
-    LOG_CHAT_ID = os.environ.get("LOG_CHAT_ID", "-1001234567890")
-
-    # ==========================================
-    # 📢 TARGET CHANNELS DATA
-    # ==========================================
-    # Jin channels me bot kaam karega (Channel ID daalna zaroori hai)
-    # Baaki post_ids bot telegram se auto-detect kar lega
+    # 5. Multi-Channel Setup & Custom Branding Credits
     CHANNELS_DATA = {
-        -1001234567890: {
+        -1001987095581: {
             "credit_text": "Made by Sakil",
             "credit_link": "https://t.me/YO_UR_OFFICIAL_CRUSH",
-            "post_ids": []
+            "post_ids": []  # Isse khali rehne dein, bot khud posts auto-detect kar lega
         },
-        # Dusra channel add karne ke liye niche uncomment (un-hash) karke format follow karein:
-        # -1009876543210: {
+        # Agar aur bhi channels add karne hon toh niche is tarah copy-paste kar sakte hain:
+        # -100XXXXXXXXXX: {
         #     "credit_text": "Made by Sakil",
         #     "credit_link": "https://t.me/YO_UR_OFFICIAL_CRUSH",
         #     "post_ids": []
-        # },
+        # }
     }
