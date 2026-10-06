@@ -1,40 +1,69 @@
 <div align="center">
 
-# ⚡ SAKIL AUTO ROTATOR PRO ⚡
+# 🤖 Sakil's Pro Telegram Multi-Channel Link Rotator
 
-[![PYTHON](https://img.shields.io/badge/PYTHON-3.10%2B-blue?style=flat-square&logo=python)](https://www.python.org/)
-[![TELEGRAM](https://img.shields.io/badge/TELEGRAM-BOT-blueviolet?style=flat-square&logo=telegram)](https://core.telegram.org/bots)
-[![BOT STATUS](https://img.shields.io/badge/BOT-ACTIVE-success?style=flat-square)]()
-[![DEVELOPER](https://img.shields.io/badge/DEVELOPER-SAKIL-critical?style=flat-square)](https://github.com/SakilSakil699)
+> **An advanced, automated 24/7 Telegram link rotation engine built for Termux & Cloud servers, featuring dynamic post auto-discovery, persistent JSON caching, per-channel branding, anti-spam delay limits, and full remote control via Sudo commands.**
 
-An automated, ultra-fast & intelligent Telegram Channel Invite Link Rotator and Post Caption Updater.  
-Designed for channel managers who need dynamic invite links, real-time caption sync, and powerful Sudo controls.
-
-[💬 Contact Developer](https://t.me/YO_UR_OFFICIAL_CRUSH) • [📌 Features](#-key-features) • [🚀 Deploy Guide](#-repository-structure)
+👑 **Developed & Maintained by [Sakil](https://t.me/YO_UR_OFFICIAL_CRUSH)**
 
 </div>
 
 ---
 
-## 🌟 Key Features
+## 🌟 Advanced Features
 
-- 🔄 **Automated Link Rotation:** Revokes expired invite links and issues fresh ones automatically at set intervals.
-- ✏️ **Dynamic Caption Syncing:** Scans and updates all existing & new post captions with dynamic links in real-time.
-- 🛡️ **Sudo Guard Architecture:** Advanced decorator protection to ensure only authorized admins can run control commands.
-- 🔍 **Instant Auto-Discovery:** Automatically detects newly posted messages in channels without manual post ID entries.
-- ⚡ **On-The-Fly Commands:** Change timing intervals, add sudos, or force-rotate directly via Telegram chat.
-- 💾 **Intelligent JSON Caching:** Prevents API limit hits by caching cleaned message texts in `bot_data.json`.
-- ⭐ **Embedded Developer Credits:** Every bot message and rotated caption includes stylish clickable credits pointing to the creator's profile.
+* **🔄 24/7 Automated Link Rotation:** Automatically revokes old chat invite links and generates fresh links at custom intervals.
+* **⚡ Dynamic Post Auto-Discovery:** Automatically scans and detects all past posts in your channels without manual IDs configuration.
+* **💾 Persistent JSON Storage:** Safely caches post contents and IDs in `bot_data.json` to prevent data loss on unexpected reboots.
+* **🛡️ Sudo Security Guard:** Restricts all sensitive admin controls (`/restart`, `/git_pull`, `/set_time`, etc.) strictly to authorized owner IDs.
+* **⏱️ Anti-Spam Rate Limit Shield:** Implements intelligent `RetryAfter` exception handling and safe delays to prevent Telegram flood blocks.
+* **🎨 Custom Branding & Spacing:** Cleans old links and cleanly appends your custom hyperlinked call-to-action credit on a separate line.
+* **📱 Remote Control Panel:** Manage everything directly from Telegram using advanced slash commands.
 
 ---
 
-## 📂 Repository Structure
+## 📋 Complete Admin Commands List
 
-```text
-Sakil-Auto-Rotator-Pro/
-├── 📄 main.py               # Core application logic & command handlers
-├── ⚙️ config.py             # Environment configurations & credentials
-├── 📦 requirements.txt      # Python dependency specifications
-├── 🚀 Procfile              # Process launcher for Render / Heroku / Koyeb
-├── 💾 bot_data.json         # Dynamic local cache & persistent database
-└── 📖 README.md             # Documentation
+| Command | Description |
+| :--- | :--- |
+| `/help` | View the interactive control panel menu with full credits. |
+| `/status` | Check system health, active interval, and tracking stats. |
+| `/list` | List all connected target channels and their post counts. |
+| `/force_rotate` | Trigger an immediate rotation across all channels instantly. |
+| `/rotate_channel <id>` | Rotate the invite link for one specific channel. |
+| `/set_time <sec>` | Change the automatic rotation interval duration in seconds. |
+| `/set_log <id>` | Update the log group/channel destination ID. |
+| `/add_channel <id>` | Add a new target channel and auto-discover its posts. |
+| `/remove_channel <id>` | Remove a channel from active tracking. |
+| `/add_post <ch_id> <msg_id>` | Manually include a specific post ID. |
+| `/remove_post <ch_id> <msg_id>` | Manually remove a specific post ID from tracking. |
+| `/add_sudo <user_id>` | Authorize a new admin/sudo user. |
+| `/remove_sudo <user_id>` | Revoke admin access from a user. |
+| `/clear_cache` | Clear stored text cache to refresh post contents. |
+| `/git_pull` | Pull the latest updates directly from your GitHub repository. |
+| `/restart` | Restart the bot process gracefully via PM2. |
+
+---
+
+## ⚙️ Configuration Setup (`config.py`)
+
+Create or update your `config.py` file with the following structure:
+
+```python
+import os
+
+class Config:
+    BOT_TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+    LOG_CHAT_ID = os.environ.get("LOG_CHAT_ID", "-1001862025596")
+    ROTATE_INTERVAL = int(os.environ.get("ROTATE_INTERVAL", 3600))
+    
+    # Your Telegram Numeric User ID for command security
+    SUDO_USERS = [123456789] 
+
+    CHANNELS_DATA = {
+        -1001987095581: {
+            "credit_text": "Made by Sakil",
+            "credit_link": "[https://t.me/YO_UR_OFFICIAL_CRUSH](https://t.me/YO_UR_OFFICIAL_CRUSH)",
+            "post_ids": []
+        }
+    }
