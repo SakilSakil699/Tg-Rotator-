@@ -2,13 +2,13 @@ import os
 
 class Config:
     # 1. Telegram Bot Token (@BotFather se mila hua token yahan daalein)
-    BOT_TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+    BOT_TOKEN = os.environ.get("BOT_TOKEN", "6325577627:AAE9yJA_Egzq2-A0L25juz8JAM9gv2_TzxA")
 
     # 2. Log Channel ya Group ID (Yahan bot apna startup banner aur rotation logs bhejega, -100 se start hona chahiye)
     LOG_CHAT_ID = os.environ.get("LOG_CHAT_ID", "-1001862025596")
 
     # 3. Rotation Interval (Seconds me, jaise 3600 seconds = 1 ghanta)
-    ROTATE_INTERVAL = int(os.environ.get("ROTATE_INTERVAL", 3600))
+    ROTATE_INTERVAL = int(os.environ.get("ROTATE_INTERVAL", 60))
 
     # 4. Sudo Users List (Yahan apni Telegram User ID daalein taaki sirf aap commands access kar sakein)
     SUDO_USERS = [
