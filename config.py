@@ -12,7 +12,7 @@ class Config:
 
     # 4. Sudo Users List (Yahan apni Telegram User ID daalein taaki sirf aap commands access kar sakein)
     SUDO_USERS = [
-        123456789,  # Apni Telegram Numeric User ID yahan replace karein
+        6024212623,  # Apni Telegram Numeric User ID yahan replace karein
     ]
 
     # 5. Multi-Channel Setup & Custom Branding Credits
