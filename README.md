@@ -47,26 +47,7 @@
 
 ## ⚙️ Configuration Setup (`config.py`)
 
-Create or update your `config.py` file with the following structure:
 
-```python
-import os
-
-class Config:
-    BOT_TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
-    LOG_CHAT_ID = os.environ.get("LOG_CHAT_ID", "-1001862025596")
-    ROTATE_INTERVAL = int(os.environ.get("ROTATE_INTERVAL", 3600))
-    
-    # Your Telegram Numeric User ID for command security
-    SUDO_USERS = [123456789] 
-
-    CHANNELS_DATA = {
-        -1001987095581: {
-            "credit_text": "Made by Sakil",
-            "credit_link": "[https://t.me/YO_UR_OFFICIAL_CRUSH](https://t.me/YO_UR_OFFICIAL_CRUSH)",
-            "post_ids": []
-        }
-    }
 🚀 Installation & Deployment (Termux / Linux)
 Clone or Update Repository:
 git clone [https://github.com/SakilSakil699/Tg-Rotator.git](https://github.com/SakilSakil699/Tg-Rotator.git)
