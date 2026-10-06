@@ -22,61 +22,78 @@ LOG_CHAT_ID = int(Config.LOG_CHAT_ID) if Config.LOG_CHAT_ID else None
 POST_IDS_RAW = getattr(Config, 'POST_IDS', '')
 POST_IDS = [int(i.strip()) for i in POST_IDS_RAW.split(",") if i.strip().isdigit()]
 
-# In-memory storage for post contents (No Manual JSON Needed)
 POST_CONTENTS = {}
 current_invite_link = None
 
 
+def clean_existing_links(content: str) -> str:
+    """Purane Hyperlink Tags, Text, aur Links ko completely clean karein"""
+    if not content:
+        return ""
+
+    # 1. HTML A-Tags (Hyperlinks) remove karein
+    content = re.sub(r'<a\s+href="[^"]*">.*?</a>', '', content, flags=re.IGNORECASE)
+    
+    # 2. Open Telegram URLs remove karein
+    content = re.sub(r'https://t\.me/(?:\+|\+[\w-]+|joinchat/[\w-]+|\w+)', '', content)
+
+    # 3. Repeat hone wale "👉 Click Here To Join Channel" phrases/lines remove karein
+    content = re.sub(r'👉\s*Click\s+Here\s+To\s+Join\s+Channel', '', content, flags=re.IGNORECASE)
+    content = re.sub(r'Click\s+Here\s+To\s+Join\s+Channel', '', content, flags=re.IGNORECASE)
+
+    # Clean multiple trailing newlines
+    lines = [line.rstrip() for line in content.splitlines()]
+    cleaned_text = "\n".join(lines).strip()
+    
+    return cleaned_text
+
+
 async def fetch_and_cache_posts(bot: Bot):
-    """Channel Posts se original content auto-fetch karein"""
+    """Channel Posts se Clean Original Content Auto-Fetch Karein"""
     for msg_id in POST_IDS:
         if msg_id not in POST_CONTENTS:
             try:
-                # Post ka object fetch karke message text/caption read karein
                 message = await bot.forward_message(
                     chat_id=LOG_CHAT_ID or CHANNEL_ID,
                     from_chat_id=CHANNEL_ID,
                     message_id=msg_id
                 )
                 
-                # Forwarded message message_id delete karein taaki log clean rahe
                 if LOG_CHAT_ID:
                     await bot.delete_message(chat_id=LOG_CHAT_ID, message_id=message.message_id)
 
-                content = message.caption or message.text or ""
+                raw_content = message.caption or message.text or ""
                 
-                # Text me se purane invite links hata kar template marker ({LINK}) lagayein
-                link_pattern = r'https://t\.me/(?:\+|\+[\w-]+|joinchat/[\w-]+)'
-                
-                if re.search(link_pattern, content):
-                    cleaned_content = re.sub(link_pattern, "{LINK}", content)
-                else:
-                    cleaned_content = content + "\n\n👉 {LINK}"
-
-                POST_CONTENTS[msg_id] = cleaned_content
-                logger.info(f"Post ID {msg_id} ka original text auto-cache ho gaya!")
+                # Purana har tarah ka link text strip karke base template rakhein
+                base_text = clean_existing_links(raw_content)
+                POST_CONTENTS[msg_id] = base_text
+                logger.info(f"Post ID {msg_id} ka clean base text auto-cache ho gaya!")
 
             except TelegramError as e:
-                logger.warning(f"Post ID {msg_id} ka content read nahi ho saka: {e}")
+                logger.warning(f"Post ID {msg_id} fetch error: {e}")
 
 
 async def update_channel_posts(bot: Bot, new_link: str):
-    """Original Text Retain karke Hyperlink Rotate Karein"""
+    """Clean Base Text me Exactly EK Rotated Hyperlink Append Karein"""
     if not POST_IDS:
         return
 
-    # Pehle saari posts ka text auto-read karein
     await fetch_and_cache_posts(bot)
 
-    hyperlink = f'<a href="{new_link}">Click Here To Join Channel</a>'
+    hyperlink_tag = f'<a href="{new_link}">Click Here To Join Channel</a>'
 
     for msg_id in POST_IDS:
-        original_template = POST_CONTENTS.get(msg_id, "👉 {LINK}")
-        final_text = original_template.replace("{LINK}", hyperlink)
+        base_text = POST_CONTENTS.get(msg_id, "")
+        
+        # Single clean line format
+        if base_text:
+            final_text = f"{base_text}\n\n👉 {hyperlink_tag}"
+        else:
+            final_text = f"👉 {hyperlink_tag}"
 
         edited = False
 
-        # 1. Media Caption Edit (Files/APKs ke liye)
+        # 1. Media Caption Edit (Files/APKs)
         try:
             await bot.edit_message_caption(
                 chat_id=CHANNEL_ID,
@@ -89,7 +106,7 @@ async def update_channel_posts(bot: Bot, new_link: str):
         except TelegramError as e:
             logger.debug(f"Media Caption Edit Attempt: {e}")
 
-        # 2. Normal Text Message Edit
+        # 2. Text Message Edit
         if not edited:
             try:
                 await bot.edit_message_text(
@@ -108,11 +125,10 @@ async def rotate_link_loop():
     global current_invite_link
     bot = Bot(token=Config.BOT_TOKEN)
 
-    logger.info("Fully Automatic Link Rotator Started!")
+    logger.info("Duplicates-Free Auto Link Rotator Started!")
 
     while True:
         try:
-            # Purana link revoke karein
             if current_invite_link:
                 try:
                     await bot.revoke_chat_invite_link(
@@ -122,7 +138,6 @@ async def rotate_link_loop():
                 except TelegramError:
                     pass
 
-            # Naya link create karein
             new_link_obj = await bot.create_chat_invite_link(
                 chat_id=CHANNEL_ID,
                 name="Auto-Rotated Link"
@@ -130,14 +145,12 @@ async def rotate_link_loop():
             current_invite_link = new_link_obj.invite_link
             logger.info(f"Naya Link: {current_invite_link}")
 
-            # Posts auto-update karein
             await update_channel_posts(bot, current_invite_link)
 
-            # Admin Notification
             if LOG_CHAT_ID:
                 await bot.send_message(
                     chat_id=LOG_CHAT_ID,
-                    text=f'🔄 Link Updated!\nNaya Link: <a href="{current_invite_link}">Click Here</a>',
+                    text=f'🔄 Link Rotated!\nNaya Link: <a href="{current_invite_link}">Click Here</a>',
                     parse_mode="HTML"
                 )
 
