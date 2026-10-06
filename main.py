@@ -20,29 +20,11 @@ DATA_FILE = "bot_data.json"
 
 POST_CONTENTS = {}
 DYNAMIC_POST_IDS = {}
-
-# ==========================================
-# ⚙️ YOUR DETAILS & CLICKABLE CREDITS
-# ==========================================
-DEVELOPER_NAME = getattr(Config, "DEVELOPER_NAME", "Sakil")
-DEVELOPER_USERNAME = "YO_UR_OFFICIAL_CRUSH"  # Aapka Telegram Username
-BOT_NAME = getattr(Config, "BOT_NAME", "Auto Rotator Pro Bot")
-
-# Clickable Name Tag with Direct Telegram Profile Link
-DEV_HYPERLINK = f'<a href="https://t.me/{DEVELOPER_USERNAME}"><b>{DEVELOPER_NAME}</b></a>'
-
-# Premium Looking Footer Credit Strip
-FOOTER_CREDIT = f"\n\n━━━━━━━━━━━━━━━━━━━━\n👑 <b>Developer:</b> {DEV_HYPERLINK}"
-
-
 CURRENT_CONFIG = {
     "rotate_interval": Config.ROTATE_INTERVAL,
     "log_chat_id": Config.LOG_CHAT_ID,
     "channels_data": Config.CHANNELS_DATA,
-    "sudo_users": getattr(Config, "SUDO_USERS", []),
-    "developer_name": DEVELOPER_NAME,
-    "developer_username": DEVELOPER_USERNAME,
-    "bot_name": BOT_NAME
+    "sudo_users": getattr(Config, "SUDO_USERS", [])
 }
 
 
@@ -61,9 +43,6 @@ def load_data():
                     CURRENT_CONFIG["rotate_interval"] = saved_cfg.get("rotate_interval", Config.ROTATE_INTERVAL)
                     CURRENT_CONFIG["log_chat_id"] = saved_cfg.get("log_chat_id", Config.LOG_CHAT_ID)
                     CURRENT_CONFIG["sudo_users"] = saved_cfg.get("sudo_users", CURRENT_CONFIG["sudo_users"])
-                    CURRENT_CONFIG["developer_name"] = saved_cfg.get("developer_name", CURRENT_CONFIG["developer_name"])
-                    CURRENT_CONFIG["developer_username"] = saved_cfg.get("developer_username", CURRENT_CONFIG["developer_username"])
-                    CURRENT_CONFIG["bot_name"] = saved_cfg.get("bot_name", CURRENT_CONFIG["bot_name"])
                     raw_ch = saved_cfg.get("channels_data", {})
                     if raw_ch:
                         CURRENT_CONFIG["channels_data"] = {int(k): v for k, v in raw_ch.items()}
@@ -84,9 +63,6 @@ def save_data():
                 "rotate_interval": CURRENT_CONFIG["rotate_interval"],
                 "log_chat_id": CURRENT_CONFIG["log_chat_id"],
                 "sudo_users": CURRENT_CONFIG["sudo_users"],
-                "developer_name": CURRENT_CONFIG["developer_name"],
-                "developer_username": CURRENT_CONFIG["developer_username"],
-                "bot_name": CURRENT_CONFIG["bot_name"],
                 "channels_data": {str(k): v for k, v in CURRENT_CONFIG["channels_data"].items()}
             },
             "post_contents": POST_CONTENTS,
@@ -100,7 +76,7 @@ def save_data():
 load_data()
 
 
-# Sudo Checking Decorator Guard
+# Sudo Guard Decorator
 def sudo_only(func):
     async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = update.effective_user.id if update.effective_user else None
@@ -108,7 +84,7 @@ def sudo_only(func):
             return await func(update, context)
         else:
             if update.message:
-                await update.message.reply_text(f"⛔ <b>Access Denied!</b> Tumhare paas Sudo permission nahi hai.{FOOTER_CREDIT}", parse_mode="HTML")
+                await update.message.reply_text("⛔ **Access Denied!** Tumhare paas Sudo permission nahi hai.", parse_mode="Markdown")
             return
     return wrapper
 
@@ -167,11 +143,11 @@ async def fetch_and_cache_post(bot: Bot, channel_id: int, msg_id: int):
 
 async def update_channel_posts(bot: Bot, channel_id: int, new_link: str):
     ch_config = CURRENT_CONFIG["channels_data"].get(channel_id, {})
-    credit_txt = ch_config.get("credit_text", f"Made by {CURRENT_CONFIG['developer_name']}")
-    credit_lnk = f"https://t.me/{CURRENT_CONFIG['developer_username']}"
+    credit_txt = ch_config.get("credit_text", "Made by Sakil")
+    credit_lnk = ch_config.get("credit_link", "https://t.me/YO_UR_OFFICIAL_CRUSH")
 
     hyperlink_tag = f'<a href="{new_link}"><b>Click Here To Join Channel</b></a>'
-    dev_credit = f'<a href="{credit_lnk}"><b>{credit_txt}</b></a>'
+    sakil_credit = f'<a href="{credit_lnk}"><b>{credit_txt}</b></a>'
 
     active_post_ids = sorted(list(DYNAMIC_POST_IDS.get(channel_id, [])))
 
@@ -182,9 +158,9 @@ async def update_channel_posts(bot: Bot, channel_id: int, new_link: str):
         base_text = POST_CONTENTS.get(cache_key, "")
 
         if base_text:
-            final_text = f"{base_text}\n\n👉 {hyperlink_tag}\n\n👤 {dev_credit}"
+            final_text = f"{base_text}\n\n👉 {hyperlink_tag}\n\n{sakil_credit}"
         else:
-            final_text = f"👉 {hyperlink_tag}\n\n👤 {dev_credit}"
+            final_text = f"👉 {hyperlink_tag}\n\n{sakil_credit}"
 
         edited = False
         try:
@@ -246,7 +222,7 @@ async def perform_rotation(bot: Bot, active_links: dict):
         try:
             await bot.send_message(
                 chat_id=int(log_id),
-                text=f'🔄 All Channels & Posts Rotated Successfully!\nCredit: {DEV_HYPERLINK}',
+                text=f'🔄 <b>All Channels & Posts Rotated Successfully!</b>\n\n👑 <i>Developed & Managed by <b>Sakil</b></i>\n🔗 <a href="https://t.me/YO_UR_OFFICIAL_CRUSH"><b>Official Channel</b></a>',
                 parse_mode="HTML"
             )
         except Exception as e:
@@ -261,63 +237,33 @@ async def channel_post_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.info(f"Nayi post auto-detect hui Channel {msg.chat_id} me | Message ID: {msg.message_id}")
 
 
-# ==========================================
-# 🌟 PUBLIC COMMANDS WITH HYPERLINK CREDITS
-# ==========================================
+# --- COMMANDS WITH SAKIL CREDIT MENU ---
 
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_name = update.effective_user.first_name if update.effective_user else "User"
-    bot_title = CURRENT_CONFIG["bot_name"]
-    
-    welcome_text = (
-        f"👋 <b>Hello {user_name}!</b>\n\n"
-        f"Welcome to <b>{bot_title}</b>!\n"
-        f"Main aapke channels ki links aur posts ko auto-rotate karne wala pro bot hoon.\n\n"
-        f"⚙️ <b>Available Commands:</b>\n"
-        f"• /start - Restart / Start Bot\n"
-        f"• /help - Bot Commands & Guide\n"
-        f"• /about - Bot & Owner Information\n"
-        f"• /ping - Check Bot Speed & Health\n\n"
-        f"👤 <b>Main Controller:</b> {DEV_HYPERLINK}"
-        f"{FOOTER_CREDIT}"
-    )
-    await update.message.reply_text(welcome_text, parse_mode="HTML")
-
-
-async def help_command_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@sudo_only
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = (
-        "📖 <b>Bot Help & Guide</b>\n\n"
-        "1. <b>Auto Rotation:</b> Bot har interval par configured channels ki links rotate karta hai.\n"
-        "2. <b>Auto Post Update:</b> Channel ki sabhi purani aur nayi posts me fresh dynamic links auto-update ho jaati hain.\n"
-        "3. <b>Sudo Access:</b> Commands control karne ke liye aapke paas Sudo access hona zaroori hai."
-        f"{FOOTER_CREDIT}"
+        f"<b>🤖 Sakil's Pro Link Rotator Control Panel</b>\n\n"
+        f"👑 <i>Created with ❤️️ by <b>Sakil</b></i>\n"
+        f"🔗 <a href='https://t.me/YO_UR_OFFICIAL_CRUSH'><b>Support / Owner Profile</b></a>\n\n"
+        f"<b>⚙️ Admin Commands List:</b>\n"
+        f"• /status - Bot system health & stats\n"
+        f"• /list - Tracked channels & posts list\n"
+        f"• /force_rotate - Instant rotate all channels\n"
+        f"• /rotate_channel <code>[id]</code> - Rotate single channel\n"
+        f"• /set_time <code>[sec]</code> - Change rotation interval\n"
+        f"• /set_log <code>[id]</code> - Update log group/channel ID\n"
+        f"• /add_channel <code>[id]</code> - Add new channel\n"
+        f"• /remove_channel <code>[id]</code> - Remove channel\n"
+        f"• /add_post <code>[ch_id] [msg_id]</code> - Add specific post\n"
+        f"• /remove_post <code>[ch_id] [msg_id]</code> - Remove specific post\n"
+        f"• /add_sudo <code>[user_id]</code> - Add new admin\n"
+        f"• /remove_sudo <code>[user_id]</code> - Remove admin\n"
+        f"• /clear_cache - Clear text cache\n"
+        f"• /git_pull - Update code from GitHub\n"
+        f"• /restart - Restart bot via PM2\n"
     )
-    await update.message.reply_text(help_text, parse_mode="HTML")
+    await update.message.reply_text(help_text, parse_mode="HTML", disable_web_page_preview=True)
 
-
-async def about_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    about_text = (
-        f"ℹ️ <b>About {CURRENT_CONFIG['bot_name']}</b>\n\n"
-        f"• <b>Version:</b> 2.0 Pro\n"
-        f"• <b>Status:</b> Running Smoothly 24/7\n"
-        f"• <b>Lead Developer:</b> {DEV_HYPERLINK}"
-        f"{FOOTER_CREDIT}"
-    )
-    await update.message.reply_text(about_text, parse_mode="HTML", disable_web_page_preview=True)
-
-
-async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    ping_text = (
-        "🏓 <b>Pong!</b>\n"
-        "Bot perfectly working halat me hai aur bilkul fast response de raha hai! ⚡"
-        f"{FOOTER_CREDIT}"
-    )
-    await update.message.reply_text(ping_text, parse_mode="HTML")
-
-
-# ==========================================
-# 🛠️ SUDO COMMANDS WITH HYPERLINK CREDITS
-# ==========================================
 
 @sudo_only
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -330,6 +276,7 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     msg = (
         f"<b>🤖 Sakil Rotator System Status</b>\n\n"
+        f"👑 <b>Owner:</b> <a href='https://t.me/YO_UR_OFFICIAL_CRUSH'>Sakil</a>\n"
         f"<b>Rotation Interval:</b> {interval} sec ({round(interval/60, 1)} min)\n"
         f"<b>Log Channel ID:</b> <code>{log_ch}</code>\n"
         f"<b>Sudo Users Count:</b> {sudos}\n"
@@ -337,49 +284,48 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"<b>Tracked Posts:</b> {total_posts}\n"
         f"<b>Cached Messages:</b> {cached_texts}\n"
         f"<b>Status:</b> Running 24/7 Smoothly 🚀"
-        f"{FOOTER_CREDIT}"
     )
-    await update.message.reply_text(msg, parse_mode="HTML")
+    await update.message.reply_text(msg, parse_mode="HTML", disable_web_page_preview=True)
 
 
 @sudo_only
 async def add_sudo_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        await update.message.reply_text(f"Usage: <code>/add_sudo &lt;user_id&gt;</code>{FOOTER_CREDIT}", parse_mode="HTML")
+        await update.message.reply_text("Usage: `/add_sudo <user_id>`", parse_mode="Markdown")
         return
     try:
         user_id = int(context.args[0].strip())
         if user_id not in CURRENT_CONFIG["sudo_users"]:
             CURRENT_CONFIG["sudo_users"].append(user_id)
             save_data()
-            await update.message.reply_text(f"✅ User <code>{user_id}</code> added to Sudo list!{FOOTER_CREDIT}", parse_mode="HTML")
+            await update.message.reply_text(f"✅ User `<code>{user_id}</code>` added to Sudo list!\n👑 <i>Managed by Sakil</i>", parse_mode="HTML")
         else:
-            await update.message.reply_text(f"⚠️ Ye user pehle se Sudo hai.{FOOTER_CREDIT}", parse_mode="HTML")
+            await update.message.reply_text("⚠️ Ye user pehle se Sudo hai.")
     except ValueError:
-        await update.message.reply_text(f"❌ Valid User ID daalo.{FOOTER_CREDIT}", parse_mode="HTML")
+        await update.message.reply_text("❌ Valid User ID daalo.")
 
 
 @sudo_only
 async def remove_sudo_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        await update.message.reply_text(f"Usage: <code>/remove_sudo &lt;user_id&gt;</code>{FOOTER_CREDIT}", parse_mode="HTML")
+        await update.message.reply_text("Usage: `/remove_sudo <user_id>`", parse_mode="Markdown")
         return
     try:
         user_id = int(context.args[0].strip())
         if user_id in CURRENT_CONFIG["sudo_users"]:
             CURRENT_CONFIG["sudo_users"].remove(user_id)
             save_data()
-            await update.message.reply_text(f"🗑️ User <code>{user_id}</code> removed from Sudo list!{FOOTER_CREDIT}", parse_mode="HTML")
+            await update.message.reply_text(f"🗑️ User `<code>{user_id}</code>` removed from Sudo list!\n👑 <i>Managed by Sakil</i>", parse_mode="HTML")
         else:
-            await update.message.reply_text(f"⚠️ Ye user Sudo list me nahi mila.{FOOTER_CREDIT}", parse_mode="HTML")
+            await update.message.reply_text("⚠️ Ye user Sudo list me nahi mila.")
     except ValueError:
-        await update.message.reply_text(f"❌ Valid User ID daalo.{FOOTER_CREDIT}", parse_mode="HTML")
+        await update.message.reply_text("❌ Valid User ID daalo.")
 
 
 @sudo_only
 async def list_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not CURRENT_CONFIG["channels_data"]:
-        await update.message.reply_text(f"📁 Koi channel configured nahi hai.{FOOTER_CREDIT}", parse_mode="HTML")
+        await update.message.reply_text("📁 Koi channel configured nahi hai.")
         return
 
     text = "<b>📋 Configured Channels & Tracked Posts:</b>\n\n"
@@ -387,107 +333,227 @@ async def list_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         posts_count = len(DYNAMIC_POST_IDS.get(ch_id, []))
         text += f"• <b>Channel:</b> <code>{ch_id}</code> | <b>Posts:</b> {posts_count}\n"
     
-    text += FOOTER_CREDIT
+    text += "\n👑 <i>Powered by Sakil Rotator Engine</i>"
     await update.message.reply_text(text, parse_mode="HTML")
 
 
 @sudo_only
 async def force_rotate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("⚡ Force Rotation Initiated for ALL channels...", parse_mode="HTML")
+    await update.message.reply_text("⚡ Force Rotation Initiated for ALL channels...\n👑 <i>Managed by Sakil</i>", parse_mode="HTML")
     await perform_rotation(context.bot, getattr(context.app, "active_links", {}))
-    await update.message.reply_text(f"✅ Force Rotation Completed!{FOOTER_CREDIT}", parse_mode="HTML")
+    await update.message.reply_text("✅ Force Rotation Completed!")
 
 
 @sudo_only
 async def rotate_channel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        await update.message.reply_text(f"Usage: <code>/rotate_channel &lt;channel_id&gt;</code>{FOOTER_CREDIT}", parse_mode="HTML")
+        await update.message.reply_text("Usage: `/rotate_channel <channel_id>`", parse_mode="Markdown")
         return
     try:
         ch_id = int(context.args[0].strip())
         if ch_id in CURRENT_CONFIG["channels_data"]:
-            await update.message.reply_text(f"⚡ Rotating single channel <code>{ch_id}</code>...", parse_mode="HTML")
+            await update.message.reply_text(f"⚡ Rotating single channel `<code>{ch_id}</code>`...", parse_mode="HTML")
             await rotate_single_channel(context.bot, ch_id, getattr(context.app, "active_links", {}))
-            await update.message.reply_text(f"✅ Single channel <code>{ch_id}</code> rotated successfully!{FOOTER_CREDIT}", parse_mode="HTML")
+            await update.message.reply_text(f"✅ Single channel `<code>{ch_id}</code>` rotated successfully!\n👑 <i>By Sakil</i>", parse_mode="HTML")
         else:
-            await update.message.reply_text(f"⚠️ Ye Channel config list me nahi hai.{FOOTER_CREDIT}", parse_mode="HTML")
+            await update.message.reply_text("⚠️ Ye Channel config list me nahi hai.")
     except ValueError:
-        await update.message.reply_text(f"❌ Valid Channel ID daalo.{FOOTER_CREDIT}", parse_mode="HTML")
+        await update.message.reply_text("❌ Valid Channel ID daalo.")
 
 
 @sudo_only
 async def set_time_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        await update.message.reply_text(f"Usage: <code>/set_time &lt;seconds&gt;</code>\nExample: <code>/set_time 1800</code>{FOOTER_CREDIT}", parse_mode="HTML")
+        await update.message.reply_text("Usage: `/set_time <seconds>`\nExample: `/set_time 1800` (for 30 mins)", parse_mode="Markdown")
         return
     try:
         new_time = int(context.args[0])
         CURRENT_CONFIG["rotate_interval"] = new_time
         save_data()
-        await update.message.reply_text(f"✅ Rotation interval set to <b>{new_time} seconds</b> ({round(new_time/60, 1)} mins)!{FOOTER_CREDIT}", parse_mode="HTML")
+        await update.message.reply_text(f"✅ Rotation interval set to **{new_time} seconds** ({round(new_time/60, 1)} mins)!\n👑 *Managed by Sakil*", parse_mode="Markdown")
     except ValueError:
-        await update.message.reply_text(f"❌ Valid number daalo (seconds me).{FOOTER_CREDIT}", parse_mode="HTML")
+        await update.message.reply_text("❌ Valid number daalo (seconds me).")
 
 
 @sudo_only
 async def set_log_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        await update.message.reply_text(f"Usage: <code>/set_log &lt;channel_id&gt;</code>{FOOTER_CREDIT}", parse_mode="HTML")
+        await update.message.reply_text("Usage: `/set_log <channel_id>`", parse_mode="Markdown")
         return
     new_log = context.args[0].strip()
     CURRENT_CONFIG["log_chat_id"] = new_log
     save_data()
-    await update.message.reply_text(f"✅ Log Channel ID set to <code>{new_log}</code>!{FOOTER_CREDIT}", parse_mode="HTML")
+    await update.message.reply_text(f"✅ Log Channel updated to: <code>{new_log}</code>\n👑 <i>By Sakil</i>", parse_mode="HTML")
 
 
-# ==========================================
-# 🚀 MAIN RUNNER SETUP
-# ==========================================
+@sudo_only
+async def add_channel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text("Usage: `/add_channel <channel_id>`", parse_mode="Markdown")
+        return
+    try:
+        ch_id = int(context.args[0].strip())
+        if ch_id not in CURRENT_CONFIG["channels_data"]:
+            CURRENT_CONFIG["channels_data"][ch_id] = {
+                "credit_text": "Made by Sakil",
+                "credit_link": "https://t.me/YO_UR_OFFICIAL_CRUSH",
+                "post_ids": []
+            }
+            DYNAMIC_POST_IDS[ch_id] = set()
+            save_data()
+            await auto_discover_channel_posts(context.bot, ch_id)
+            await update.message.reply_text(f"✅ Channel <code>{ch_id}</code> added & posts auto-detected!\n👑 <i>Engine by Sakil</i>", parse_mode="HTML")
+        else:
+            await update.message.reply_text("⚠️ Ye Channel pehle se added hai.")
+    except ValueError:
+        await update.message.reply_text("❌ Valid Channel ID daalo (-100 se start honi chahiye).")
 
-async def rotation_loop(app: Application):
+
+@sudo_only
+async def remove_channel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text("Usage: `/remove_channel <channel_id>`", parse_mode="Markdown")
+        return
+    try:
+        ch_id = int(context.args[0].strip())
+        if ch_id in CURRENT_CONFIG["channels_data"]:
+            del CURRENT_CONFIG["channels_data"][ch_id]
+            if ch_id in DYNAMIC_POST_IDS:
+                del DYNAMIC_POST_IDS[ch_id]
+            save_data()
+            await update.message.reply_text(f"🗑️ Channel <code>{ch_id}</code> removed!\n👑 <i>By Sakil</i>", parse_mode="HTML")
+        else:
+            await update.message.reply_text("⚠️ Ye Channel list me nahi mila.")
+    except ValueError:
+        await update.message.reply_text("❌ Valid Channel ID daalo.")
+
+
+@sudo_only
+async def add_post_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if len(context.args) < 2:
+        await update.message.reply_text("Usage: `/add_post <channel_id> <msg_id>`", parse_mode="Markdown")
+        return
+    try:
+        ch_id = int(context.args[0].strip())
+        msg_id = int(context.args[1].strip())
+        if ch_id in DYNAMIC_POST_IDS:
+            DYNAMIC_POST_IDS[ch_id].add(msg_id)
+            save_data()
+            await update.message.reply_text(f"✅ Post ID `{msg_id}` manually added for channel <code>{ch_id}</code>!\n👑 <i>By Sakil</i>", parse_mode="HTML")
+        else:
+            await update.message.reply_text("❌ Pehle channel ko `/add_channel` se add karo.")
+    except ValueError:
+        await update.message.reply_text("❌ Valid numbers daalo.")
+
+
+@sudo_only
+async def remove_post_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if len(context.args) < 2:
+        await update.message.reply_text("Usage: `/remove_post <channel_id> <msg_id>`", parse_mode="Markdown")
+        return
+    try:
+        ch_id = int(context.args[0].strip())
+        msg_id = int(context.args[1].strip())
+        if ch_id in DYNAMIC_POST_IDS and msg_id in DYNAMIC_POST_IDS[ch_id]:
+            DYNAMIC_POST_IDS[ch_id].remove(msg_id)
+            cache_key = f"{ch_id}_{msg_id}"
+            POST_CONTENTS.pop(cache_key, None)
+            save_data()
+            await update.message.reply_text(f"🗑️ Post ID `{msg_id}` removed from channel <code>{ch_id}</code>!\n👑 <i>By Sakil</i>", parse_mode="HTML")
+        else:
+            await update.message.reply_text("⚠️️ Ye Post ID list me nahi mili.")
+    except ValueError:
+        await update.message.reply_text("❌ Valid numbers daalo.")
+
+
+@sudo_only
+async def clear_cache_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global POST_CONTENTS
+    POST_CONTENTS.clear()
+    save_data()
+    await update.message.reply_text("🧹 Text cache cleared!\n👑 <i>Managed by Sakil</i>")
+
+
+@sudo_only
+async def git_pull_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("🔄 Running `git pull origin main`...\n👑 *Sakil Rotator*", parse_mode="Markdown")
+    try:
+        result = subprocess.run(["git", "pull", "origin", "main"], capture_output=True, text=True, check=True)
+        await update.message.reply_text(f"✅ **Git Pull Output:**\n```\n{result.stdout}\n```\n👑 *By Sakil*", parse_mode="Markdown")
+    except Exception as e:
+        await update.message.reply_text(f"❌ **Git Pull Failed:**\n`{e}`", parse_mode="Markdown")
+
+
+@sudo_only
+async def restart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("♻️ Restarting bot via PM2...\n👑 *Sakil Rotator Engine*", parse_mode="Markdown")
+    try:
+        subprocess.run(["pm2", "restart", "link-rotator"])
+    except Exception as e:
+        await update.message.reply_text(f"❌ Restart Error: `{e}`", parse_mode="Markdown")
+
+
+async def rotate_link_loop(app: Application):
+    bot = app.bot
+    logger.info("Sakil's Pro Dynamic Rotator Engine Active!")
+
+    # Startup pe Log Group ya Sudo owner ko Startup Banner bhejenge
+    log_id = CURRENT_CONFIG["log_chat_id"]
+    if log_id:
+        try:
+            startup_banner = (
+                f"🚀 <b>Sakil's Pro Link Rotator Bot Started Successfully!</b>\n\n"
+                f"👑 <b>Developed & Maintained by:</b> <a href='https://t.me/YO_UR_OFFICIAL_CRUSH'>Sakil</a>\n"
+                f"⚡ <b>Engine Status:</b> Online & Running 24/7\n"
+                f"📋 Type /help to view all admin commands.\n\n"
+                f"<i>'Excellence in Automation by Sakil' ✨</i>"
+            )
+            await bot.send_message(chat_id=int(log_id), text=startup_banner, parse_mode="HTML", disable_web_page_preview=True)
+        except Exception as e:
+            logger.error(f"Failed to send startup banner: {e}")
+
+    app.active_links = {}
+
+    for channel_id in list(CURRENT_CONFIG["channels_data"].keys()):
+        await auto_discover_channel_posts(bot, channel_id)
+
     while True:
         try:
-            await perform_rotation(app.bot, app.active_links)
+            await perform_rotation(bot, app.active_links)
         except Exception as e:
-            logger.error(f"Rotation loop error: {e}")
-        
-        interval = CURRENT_CONFIG.get("rotate_interval", Config.ROTATE_INTERVAL)
-        await asyncio.sleep(interval)
+            logger.error(f"Loop Error: {e}")
+
+        await asyncio.sleep(CURRENT_CONFIG["rotate_interval"])
+
+
+async def post_init(app: Application):
+    asyncio.create_task(rotate_link_loop(app))
 
 
 def main():
-    token = getattr(Config, "BOT_TOKEN", None) or os.getenv("BOT_TOKEN")
-    if not token:
-        logger.error("BOT_TOKEN config file me nahi mila!")
-        sys.exit(1)
-
-    app = Application.builder().token(token).build()
-    app.active_links = {}
-
-    # Public Handlers
-    app.add_handler(CommandHandler("start", start_command))
-    app.add_handler(CommandHandler("help", help_command_user))
-    app.add_handler(CommandHandler("about", about_command))
-    app.add_handler(CommandHandler("ping", ping_command))
-
-    # Sudo Handlers
+    app = Application.builder().token(Config.BOT_TOKEN).post_init(post_init).build()
+    
+    # Registering Commands with Sakil Credit Header
+    app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("status", status_command))
-    app.add_handler(CommandHandler("add_sudo", add_sudo_command))
-    app.add_handler(CommandHandler("remove_sudo", remove_sudo_command))
     app.add_handler(CommandHandler("list", list_command))
     app.add_handler(CommandHandler("force_rotate", force_rotate_command))
     app.add_handler(CommandHandler("rotate_channel", rotate_channel_command))
     app.add_handler(CommandHandler("set_time", set_time_command))
     app.add_handler(CommandHandler("set_log", set_log_command))
-
-    # Channel Handler
+    app.add_handler(CommandHandler("add_channel", add_channel_command))
+    app.add_handler(CommandHandler("remove_channel", remove_channel_command))
+    app.add_handler(CommandHandler("add_post", add_post_command))
+    app.add_handler(CommandHandler("remove_post", remove_post_command))
+    app.add_handler(CommandHandler("add_sudo", add_sudo_command))
+    app.add_handler(CommandHandler("remove_sudo", remove_sudo_command))
+    app.add_handler(CommandHandler("clear_cache", clear_cache_command))
+    app.add_handler(CommandHandler("git_pull", git_pull_command))
+    app.add_handler(CommandHandler("restart", restart_command))
+    
     app.add_handler(MessageHandler(filters.ChatType.CHANNEL, channel_post_handler))
 
-    # Start Loop
-    asyncio.get_event_loop().create_task(rotation_loop(app))
-
-    logger.info("⚡ Sakil Auto Rotator Pro Bot Started Successfully!")
-    app.run_polling()
+    app.run_polling(drop_pending_updates=True)
 
 
 if __name__ == "__main__":
