@@ -86,9 +86,9 @@ async def update_channel_posts(bot: Bot, channel_id: int, new_link: str):
         base_text = POST_CONTENTS.get(cache_key, "")
 
         if base_text:
-            final_text = f"{base_text}\n\n👉 {hyperlink_tag}\n{sakil_credit}"
+            final_text = f"{base_text}\n\n👉 {hyperlink_tag}\n\n{sakil_credit}"
         else:
-            final_text = f"👉 {hyperlink_tag}\n{sakil_credit}"
+            final_text = f"👉 {hyperlink_tag}\n\n{sakil_credit}"
 
         edited = False
         
