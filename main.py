@@ -167,7 +167,6 @@ async def rotate_link_loop(app: Application):
 
 
 async def post_init(app: Application):
-    """Event Loop Active Hone Ke Baad Rotation Task Start Karega"""
     asyncio.create_task(rotate_link_loop(app))
 
 
